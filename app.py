@@ -1,37 +1,26 @@
 import streamlit as st
 from questions import appearance_questions, aroma_questions, taste_questions
 from wine_notes import generate_note
-import urllib.parse
+from pdf_generator import create_pdf
 
 st.title("🍷 Wine Tasting Assistant")
 
-st.header("1. Appearance")
-appearance = {}
-for q, options in appearance_questions.items():
-    appearance[q] = st.selectbox(f"Select {q}", options)
+# 1. Tadım bilgileri
+appearance = {q: st.selectbox(f"{q}", opts) for q, opts in appearance_questions.items()}
+aroma = {q: st.selectbox(f"{q}", opts) for q, opts in aroma_questions.items()}
+taste = {q: st.selectbox(f"{q}", opts) for q, opts in taste_questions.items()}
 
-st.header("2. Aroma")
-aroma = {}
-for q, options in aroma_questions.items():
-    aroma[q] = st.selectbox(f"Select {q}", options)
-
-st.header("3. Taste")
-taste = {}
-for q, options in taste_questions.items():
-    taste[q] = st.selectbox(f"Select {q}", options)
-
-st.header("4. Wine Name")
+# 2. Şarap adı
 wine_name = st.text_input("Enter the wine name")
 
-if st.button("Generate Wine Note"):
+# 3. Şarap fotoğrafı yükle
+uploaded_file = st.file_uploader("📸 Upload a photo of the wine bottle", type=["jpg", "jpeg", "png"])
+
+# 4. Generate note & PDF
+if st.button("Generate PDF Tasting Note"):
     note, prompt = generate_note(wine_name, appearance, aroma, taste)
-    st.subheader("📄 Tasting Note")
-    st.markdown(note)
+    pdf_file = create_pdf(note, uploaded_file)
 
-    # Görsel önerisi için Google arama linki
-    encoded_prompt = urllib.parse.quote(prompt)
-    search_url = f"https://www.google.com/search?tbm=isch&q={encoded_prompt}"
-
-    st.markdown("### 🔍 Suggested Image")
-    st.markdown(f"[Click here to search the image on Google Images]({search_url})")
-    st.markdown(f"📷 **Prompt:** _{prompt}_")
+    st.subheader("📄 Download your personalized PDF")
+    st.download_button("⬇️ Download PDF", data=pdf_file, file_name=f"{wine_name}_tasting_note.pdf", mime="application/pdf")
+    st.markdown(f"📷 Suggested Image Prompt: _{prompt}_")
