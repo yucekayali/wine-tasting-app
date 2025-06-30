@@ -17,6 +17,5 @@ def create_pdf(note_text, image_file):
         current_y = pdf.get_y() + 10
         pdf.image(img_path, x=10, y=current_y, w=100)
 
-    # Doğrudan bellek çıktısı
     pdf_bytes = pdf.output(dest='S').encode('latin-1')
     return io.BytesIO(pdf_bytes)
